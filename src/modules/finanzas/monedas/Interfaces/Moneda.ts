@@ -1,6 +1,6 @@
 export interface Moneda {
-  id: number;
+  id: string;
+  codigo: string;
   nombre: string;
   simbolo: string;
-  codigo: string;
 }

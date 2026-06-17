@@ -1,8 +1,8 @@
 export interface TipoCambio {
-  id: number;
+  id: string;
   monedaOrigen: string;
   monedaDestino: string;
-  compra: number;
-  venta: number;
-  fechaRegistro: string;
+  precioCompra: number;
+  precioVenta: number;
+  fechaActualizacion: string;
 }
