@@ -1,69 +1,97 @@
-﻿import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLogin } from "../hooks/useLogin";
+﻿/**
+ * Componente LoginForm
+ * Formulario para autenticación de usuarios
+ * Ubicación: src/modules/auth/login/components/LoginForm.tsx
+ */
 
-export const LoginForm = () => {
+import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../hooks/useLogin';
+import { FormInput } from '@/shared/components/FormInput';
+
+interface LoginFormProps {
+  onSuccess?: () => void;
+}
+
+export function LoginForm({ onSuccess }: LoginFormProps) {
   const navigate = useNavigate();
-  const { values, handleChange, login, isLoading, error } = useLogin();
+  const { form, onSubmit, isLoading, success, error } = useLogin();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      await login();
-      navigate("/dashboard");
-    } catch (e) {
-      // error shown by hook
+  const handleSubmit = async (data: any) => {
+    const ok = await onSubmit(data);
+    if (ok) {
+      onSuccess?.() || navigate('/dashboard');
     }
   };
 
   return (
-    <div className="w-full max-w-md bg-slate-800 rounded-xl shadow-2xl p-8 text-gray-100">
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-extrabold">Iniciar Sesión</h2>
-        <p className="text-sm text-slate-400 mt-2">Bienvenido — Accede a tu panel de Casa de Cambios</p>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="w-full max-w-md p-8 bg-slate-900 rounded-xl shadow-2xl border border-slate-800">
+        <h1 className="text-3xl font-bold text-white mb-8 text-center">Casa de Cambios</h1>
 
-      <div className="text-sm text-slate-400 mb-4">📌 GUÍA DEL EQUIPO: Este formulario pertenece al módulo de Auth.</div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm text-slate-300">Email</label>
-          <input
-            id="email"
-            name="email"
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          {/* Email */}
+          <FormInput
+            label="Email"
             type="email"
-            value={values.email}
-            onChange={handleChange}
-            required
-            className="mt-1 w-full bg-slate-700 border border-slate-700 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg p-3 text-gray-100 outline-none transition"
+            placeholder="tu@email.com"
+            {...form.register('email')}
+            error={form.formState.errors.email}
           />
-        </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm text-slate-300">Contraseña</label>
-          <input
-            id="password"
-            name="password"
+          {/* Password */}
+          <FormInput
+            label="Contraseña"
             type="password"
-            value={values.password}
-            onChange={handleChange}
-            required
-            className="mt-1 w-full bg-slate-700 border border-slate-700 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg p-3 text-gray-100 outline-none transition"
+            placeholder="••••••••"
+            {...form.register('password')}
+            error={form.formState.errors.password}
           />
-        </div>
 
-        {error ? (
-          <div className="text-sm text-red-300">{error}</div>
-        ) : null}
+          {/* Recuérdame */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="recuerdame"
+              className="rounded border-slate-700 bg-slate-800 text-emerald-600 focus:ring-emerald-500"
+              {...form.register('recuerdame')}
+            />
+            <label htmlFor="recuerdame" className="text-sm text-slate-300">
+              Recuérdame
+            </label>
+          </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
-        >
-          {isLoading ? "Cargando..." : "Iniciar Sesión"}
-        </button>
-      </form>
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-900/30 border border-red-700 rounded-lg text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="p-4 bg-emerald-900/30 border border-emerald-700 rounded-lg text-emerald-200 text-sm">
+              ✓ Inicio de sesión exitoso
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition duration-200"
+          >
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+          </button>
+
+          {/* Links */}
+          <div className="text-center text-sm text-slate-400">
+            ¿Olvidaste tu contraseña?{' '}
+            <a href="/recuperar-password" className="text-emerald-500 hover:text-emerald-400">
+              Recupérala aquí
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   );
-};
+}

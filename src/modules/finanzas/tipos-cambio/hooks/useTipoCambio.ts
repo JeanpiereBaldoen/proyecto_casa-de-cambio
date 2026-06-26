@@ -1,39 +1,54 @@
-import { useState, type ChangeEvent } from "react";
+/**
+ * Custom hook para Tipo de Cambio
+ */
 
-export const useTipoCambio = () => {
-  const [precioCompra, setPrecioCompra] = useState(0);
-  const [precioVenta, setPrecioVenta] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { tipoCambioService } from '../services/tipoCambioService';
+import { useFormSubmit } from '@/shared/hooks/useFormSubmit';
+import { tipoCambioFormSchema } from '@/shared/schemas/formSchemas';
+import type { TipoCambioFormData } from '@/shared/schemas/formSchemas';
 
-  const handlePrecioCompraChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPrecioCompra(Number(event.target.value));
-  };
+export function useTipoCambio(id?: string) {
+  const form = useForm<TipoCambioFormData>({
+    resolver: zodResolver(tipoCambioFormSchema),
+    defaultValues: {
+      monedaOrigen: '',
+      monedaDestino: '',
+      precioCompra: 0,
+      precioVenta: 0,
+      fechaVigencia: new Date().toISOString().split('T')[0],
+    },
+    mode: 'onChange',
+  });
 
-  const handlePrecioVentaChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPrecioVenta(Number(event.target.value));
-  };
+  const { setLoading, setError, setSuccess, isLoading, success, error } = useFormSubmit();
 
-  const guardarTipoCambio = async () => {
-    setIsLoading(true);
-    setSuccess(false);
+  const onSubmit = async (data: TipoCambioFormData) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    return new Promise<void>((resolve) => {
+      await tipoCambioService.save(data);
+
+      setSuccess(true);
       setTimeout(() => {
-        setIsLoading(false);
-        setSuccess(true);
-        resolve();
-      }, 1000);
-    });
+        form.reset();
+      }, 500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al guardar tipo de cambio';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
-    precioCompra,
-    precioVenta,
-    handlePrecioCompraChange,
-    handlePrecioVentaChange,
-    guardarTipoCambio,
+    form,
+    onSubmit,
     isLoading,
     success,
+    error,
   };
-};
+}
+

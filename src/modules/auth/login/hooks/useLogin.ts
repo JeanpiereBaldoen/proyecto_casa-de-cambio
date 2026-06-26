@@ -1,42 +1,74 @@
-import { useState, type ChangeEvent } from "react";
-import type { LoginRequest } from "../interfaces/LoginRequest";
+/**
+ * Custom hook para manejar la lógica de Login
+ * Separación entre vista (LoginForm) y lógica de negocio
+ */
 
-export const useLogin = () => {
-  const [values, setValues] = useState<LoginRequest>({
-    email: "",
-    password: "",
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuthStore } from '@/store/authStore';
+import { authService } from '../services/authService';
+import { useFormSubmit } from '@/shared/hooks/useFormSubmit';
+import { loginFormSchema } from '@/shared/schemas/formSchemas';
+import type { LoginFormData } from '@/shared/schemas/formSchemas';
+
+export function useLogin() {
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      recuerdame: false,
+    },
+    mode: 'onChange',
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
-  };
+  const { setLoading, setError, setSuccess, isLoading, success, error } = useFormSubmit();
+  const login = useAuthStore((state) => state.login);
 
-  const login = async () => {
-    setIsLoading(true);
-    setError(null);
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    return new Promise<void>((resolve, reject) => {
+      // Llamar al servicio de autenticación
+
+      const response = await authService.login({
+        email: data.email,
+        password: data.password,
+        recuerdame: data.recuerdame,
+      });
+
+      if (!response || !response.token) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      // Actualizar store de autenticación
+      login(data.email);
+
+      // Marcar como éxito
+      setSuccess(true);
+
+      // Limpiar formulario
       setTimeout(() => {
-        if (values.email.trim() && values.password.trim()) {
-          setIsLoading(false);
-          resolve();
-        } else {
-          setError("Email y contrase�a son requeridos.");
-          setIsLoading(false);
-          reject(new Error("Datos inv�lidos"));
-        }
-      }, 1000);
-    });
+        form.reset();
+      }, 500);
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setError(message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
-    values,
-    handleChange,
-    login,
+    form,
+    onSubmit,
     isLoading,
+    success,
     error,
   };
-};
+}
+
+
