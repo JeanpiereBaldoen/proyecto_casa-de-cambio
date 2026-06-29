@@ -1,13 +1,25 @@
-import { ReactNode } from "react";
-import { Navbar } from "./Navbar";
+import { Outlet } from 'react-router-dom';
+import { Navbar } from './Navbar'; // <-- ¡Solo agrégale las llaves aquí!
+import Sidebar from './Sidebar';
 
-type Props = { children?: ReactNode };
-
-export const MainLayout = ({ children }: Props) => {
+const MainLayout = () => {
   return (
-    <div className="min-h-screen w-full bg-slate-900 text-gray-100">
-      <Navbar />
-      <main className="max-w-7xl mx-auto p-6">{children}</main>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
+      {/* Menu Lateral Fijo */}
+      <Sidebar />
+
+      {/* Contenedor del contenido derecho */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Barra Superior */}
+        <Navbar />
+
+        {/* Zona de contenido dinámico donde cambian las páginas */}
+        <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };
+
+export default MainLayout;
