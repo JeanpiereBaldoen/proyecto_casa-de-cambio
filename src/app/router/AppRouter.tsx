@@ -5,18 +5,17 @@ import { ClienteListPage } from "../../modules/clientes/clientes/pages/ClienteLi
 import { MonedaListPage } from "../../modules/finanzas/monedas/pages/MonedaListPage";
 import { TipoCambioListPage } from "../../modules/finanzas/tipos-cambio/pages/TipoCambioListPage";
 import { TipoCambioFormPage } from "../../modules/finanzas/tipos-cambio/pages/TipoCambioFormPage";
-import { MainLayout } from "../../shared/layouts/MainLayout";
-
+import MainLayout from "../../shared/layouts/MainLayout";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
 
-        <Route
+   <Route
           path="/"
           element={<MainLayout />}
-        >
+        > {/* <-- Asegúrate de que cierre aquí con '>' para abrir las rutas hijas */}
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="clientes" element={<ClienteListPage />} />
           <Route path="monedas" element={<MonedaListPage />} />

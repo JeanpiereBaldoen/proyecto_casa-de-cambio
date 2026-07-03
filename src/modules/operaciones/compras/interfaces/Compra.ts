@@ -1,0 +1,1 @@
+/**\n * Interfaces para Compra\n */\n\nexport interface Compra {\n  id: string;\n  clienteId: string;\n  monedaId: string;\n  montoDivisas: number;\n  tipoCambioAplicado: number;\n  montoLocal: number;\n  comision: number;\n  montoFinal: number;\n  observaciones?: string;\n  fechaCreacion: string;\n}\n
