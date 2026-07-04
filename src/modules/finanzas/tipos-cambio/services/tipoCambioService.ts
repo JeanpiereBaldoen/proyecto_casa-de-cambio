@@ -5,23 +5,39 @@
 
 import type { TipoCambioFormData } from '@/shared/schemas/formSchemas';
 
+import { api } from '@/api/axios';
+import { endpoints } from '@/api/endpoints';
+
+import type { ApiResponse } from '@/interfaces/ApiResponse';
+import type { TipoCambio } from '@/interfaces/TipoCambio';
+
 export const tipoCambioService = {
   /**
    * Guarda un nuevo tipo de cambio
-   * TODO: Implementar POST a /api/finanzas/tipos-cambio
+   * API: POST /api/finanzas/tipos-cambio
    */
-  async save(data: TipoCambioFormData): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    console.log('[tipoCambioService.save] Guardando tipo de cambio:', data);
+  async save(data: TipoCambioFormData): Promise<TipoCambio> {
+    const payload = {
+      monedaOrigen: data.monedaOrigen,
+      monedaDestino: data.monedaDestino,
+      precioCompra: data.precioCompra,
+      precioVenta: data.precioVenta,
+      fechaVigencia: data.fechaVigencia,
+    };
+
+    const response = await api.post(endpoints.tiposCambio.base, payload);
+    return (response.data as ApiResponse<TipoCambio>).data ?? (response.data as TipoCambio);
   },
 
   /**
    * Obtiene todos los tipos de cambio activos
-   * TODO: Implementar GET a /api/finanzas/tipos-cambio?activos=true
+   * API: GET /api/finanzas/tipos-cambio?activos=true
    */
-  async getActivos(): Promise<any[]> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    console.log('[tipoCambioService.getActivos] Obteniendo tipos de cambio activos');
-    return [];
+  async getActivos(): Promise<TipoCambio[]> {
+    const response = await api.get(endpoints.tiposCambio.activos);
+
+    const payload = response.data as ApiResponse<TipoCambio[]>;
+    return payload.data ?? (response.data as TipoCambio[]);
   },
 };
+

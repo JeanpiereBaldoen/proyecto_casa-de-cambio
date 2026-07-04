@@ -3,28 +3,28 @@
  * API: POST /api/auth/login
  */
 
-import type { LoginFormInterface, LoginResponse } from '../interfaces/LoginForm';
+import type { LoginFormInterface } from '../interfaces/LoginForm';
+
+import type { LoginRequest, LoginResponse } from '@/interfaces/Auth';
+import { authApi } from '@/api/axios';
 
 export const authService = {
   /**
    * Autentica un usuario con email y contraseña
-   * TODO: Implementar llamada POST a /api/auth/login
+   * API: POST /api/auth/login
    */
   async login(credentials: LoginFormInterface): Promise<LoginResponse> {
-    // Placeholder: simular delay de red
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    console.log('[authService.login] Autenticando usuario:', credentials.email);
-
-    // TODO: Reemplazar con llamada real a API
-    // const response = await axios.post('/api/auth/login', credentials);
-    // return response.data;
-
-    // Simular respuesta de la API
-    return {
-      token: 'mock-token-123',
-      usuario: credentials.email,
-      rol: 'user',
+    const payload: LoginRequest = {
+      email: credentials.email,
+      password: credentials.password,
+      recuerdame: credentials.recuerdame,
     };
+
+    const response = await authApi.login(payload);
+
+    // Json Server usualmente retorna el objeto directamente.
+    // Si tu backend devuelve { success, data }, se ajusta aquí.
+    return response.data as LoginResponse;
   },
 };
+
